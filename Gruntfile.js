@@ -2,9 +2,10 @@
 
 module.exports = function( grunt ) {
 
+const { gzipSync } = require( "node:zlib" );
+
 // files
 const coreFiles = [
-	"core.js",
 	"widget.js",
 	"widgets/mouse.js",
 	"widgets/draggable.js",
@@ -75,7 +76,15 @@ const compareFiles = {
 	all: [
 		"dist/jquery-ui.js",
 		"dist/jquery-ui.min.js"
-	]
+	],
+	options: {
+		compress: {
+			gz: function( contents ) {
+				return gzipSync( contents ).length;
+			}
+		},
+		cache: "build/.sizecache.json"
+	}
 };
 
 const htmllintBad = [
@@ -84,15 +93,6 @@ const htmllintBad = [
 	"tests/unit/core/core.html",
 	"tests/unit/tabs/data/test.html"
 ];
-
-const nodeV16OrNewer = !/^v1[0-5]\./.test( process.version );
-
-// Support: Node.js <16
-// Skip running tasks that dropped support for Node.js 10-15
-// in this Node version.
-function runIfNewNode( task ) {
-	return nodeV16OrNewer ? task : "print_old_node_message:" + task;
-}
 
 function mapMinFile( file ) {
 	return "dist/" + file.replace( /ui\//, "minified/" );
@@ -115,8 +115,6 @@ uiFiles.concat( allI18nFiles ).forEach( function( file ) {
 } );
 
 uiFiles.forEach( function( file ) {
-
-	// TODO this doesn't do anything until https://github.com/rwldrn/grunt-compare-size/issues/13
 	compareFiles[ file ] = [ file, mapMinFile( file ) ];
 } );
 
@@ -167,7 +165,7 @@ grunt.initConfig( {
 				findNestedDependencies: true,
 				skipModuleInsertion: true,
 				exclude: [ "jquery" ],
-				include: expandFiles( [ "ui/**/*.js", "!ui/core.js", "!ui/i18n/*" ] ),
+				include: expandFiles( [ "ui/**/*.js", "!ui/i18n/*" ] ),
 				out: "dist/jquery-ui.js",
 				wrap: {
 					start: createBanner( uiFiles )
@@ -258,98 +256,8 @@ grunt.initConfig( {
 				"jquery/jquery.js": "jquery-3.x/dist/jquery.js",
 				"jquery/LICENSE.txt": "jquery-3.x/LICENSE.txt",
 
-				"jquery-1.8.0/jquery.js": "jquery-1.8.0/jquery.js",
-				"jquery-1.8.0/MIT-LICENSE.txt": "jquery-1.8.0/MIT-LICENSE.txt",
-
-				"jquery-1.8.1/jquery.js": "jquery-1.8.1/jquery.js",
-				"jquery-1.8.1/MIT-LICENSE.txt": "jquery-1.8.1/MIT-LICENSE.txt",
-
-				"jquery-1.8.2/jquery.js": "jquery-1.8.2/jquery.js",
-				"jquery-1.8.2/MIT-LICENSE.txt": "jquery-1.8.2/MIT-LICENSE.txt",
-
-				"jquery-1.8.3/jquery.js": "jquery-1.8.3/jquery.js",
-				"jquery-1.8.3/MIT-LICENSE.txt": "jquery-1.8.3/MIT-LICENSE.txt",
-
-				"jquery-1.9.0/jquery.js": "jquery-1.9.0/jquery.js",
-				"jquery-1.9.0/MIT-LICENSE.txt": "jquery-1.9.0/MIT-LICENSE.txt",
-
-				"jquery-1.9.1/jquery.js": "jquery-1.9.1/jquery.js",
-				"jquery-1.9.1/MIT-LICENSE.txt": "jquery-1.9.1/MIT-LICENSE.txt",
-
-				"jquery-1.10.0/jquery.js": "jquery-1.10.0/jquery.js",
-				"jquery-1.10.0/MIT-LICENSE.txt": "jquery-1.10.0/MIT-LICENSE.txt",
-
-				"jquery-1.10.1/jquery.js": "jquery-1.10.1/jquery.js",
-				"jquery-1.10.1/MIT-LICENSE.txt": "jquery-1.10.1/MIT-LICENSE.txt",
-
-				"jquery-1.10.2/jquery.js": "jquery-1.10.2/jquery.js",
-				"jquery-1.10.2/MIT-LICENSE.txt": "jquery-1.10.2/MIT-LICENSE.txt",
-
-				"jquery-1.11.0/jquery.js": "jquery-1.11.0/dist/jquery.js",
-				"jquery-1.11.0/MIT-LICENSE.txt": "jquery-1.11.0/MIT-LICENSE.txt",
-
-				"jquery-1.11.1/jquery.js": "jquery-1.11.1/dist/jquery.js",
-				"jquery-1.11.1/MIT-LICENSE.txt": "jquery-1.11.1/MIT-LICENSE.txt",
-
-				"jquery-1.11.2/jquery.js": "jquery-1.11.2/dist/jquery.js",
-				"jquery-1.11.2/MIT-LICENSE.txt": "jquery-1.11.2/MIT-LICENSE.txt",
-
-				"jquery-1.11.3/jquery.js": "jquery-1.11.3/dist/jquery.js",
-				"jquery-1.11.3/MIT-LICENSE.txt": "jquery-1.11.3/MIT-LICENSE.txt",
-
-				"jquery-1.12.0/jquery.js": "jquery-1.12.0/dist/jquery.js",
-				"jquery-1.12.0/LICENSE.txt": "jquery-1.12.0/LICENSE.txt",
-
-				"jquery-1.12.1/jquery.js": "jquery-1.12.1/dist/jquery.js",
-				"jquery-1.12.1/LICENSE.txt": "jquery-1.12.1/LICENSE.txt",
-
-				"jquery-1.12.2/jquery.js": "jquery-1.12.2/dist/jquery.js",
-				"jquery-1.12.2/LICENSE.txt": "jquery-1.12.2/LICENSE.txt",
-
-				"jquery-1.12.3/jquery.js": "jquery-1.12.3/dist/jquery.js",
-				"jquery-1.12.3/LICENSE.txt": "jquery-1.12.3/LICENSE.txt",
-
 				"jquery-1.12.4/jquery.js": "jquery-1.12.4/dist/jquery.js",
 				"jquery-1.12.4/LICENSE.txt": "jquery-1.12.4/LICENSE.txt",
-
-				"jquery-2.0.0/jquery.js": "jquery-2.0.0/jquery.js",
-				"jquery-2.0.0/MIT-LICENSE.txt": "jquery-2.0.0/MIT-LICENSE.txt",
-
-				"jquery-2.0.1/jquery.js": "jquery-2.0.1/jquery.js",
-				"jquery-2.0.1/MIT-LICENSE.txt": "jquery-2.0.1/MIT-LICENSE.txt",
-
-				"jquery-2.0.2/jquery.js": "jquery-2.0.2/jquery.js",
-				"jquery-2.0.2/MIT-LICENSE.txt": "jquery-2.0.2/MIT-LICENSE.txt",
-
-				"jquery-2.0.3/jquery.js": "jquery-2.0.3/jquery.js",
-				"jquery-2.0.3/MIT-LICENSE.txt": "jquery-2.0.3/MIT-LICENSE.txt",
-
-				"jquery-2.1.0/jquery.js": "jquery-2.1.0/dist/jquery.js",
-				"jquery-2.1.0/MIT-LICENSE.txt": "jquery-2.1.0/MIT-LICENSE.txt",
-
-				"jquery-2.1.1/jquery.js": "jquery-2.1.1/dist/jquery.js",
-				"jquery-2.1.1/MIT-LICENSE.txt": "jquery-2.1.1/MIT-LICENSE.txt",
-
-				"jquery-2.1.2/jquery.js": "jquery-2.1.2/dist/jquery.js",
-				"jquery-2.1.2/MIT-LICENSE.txt": "jquery-2.1.2/MIT-LICENSE.txt",
-
-				"jquery-2.1.3/jquery.js": "jquery-2.1.3/dist/jquery.js",
-				"jquery-2.1.3/MIT-LICENSE.txt": "jquery-2.1.3/MIT-LICENSE.txt",
-
-				"jquery-2.1.4/jquery.js": "jquery-2.1.4/dist/jquery.js",
-				"jquery-2.1.4/MIT-LICENSE.txt": "jquery-2.1.4/MIT-LICENSE.txt",
-
-				"jquery-2.2.0/jquery.js": "jquery-2.2.0/dist/jquery.js",
-				"jquery-2.2.0/LICENSE.txt": "jquery-2.2.0/LICENSE.txt",
-
-				"jquery-2.2.1/jquery.js": "jquery-2.2.1/dist/jquery.js",
-				"jquery-2.2.1/LICENSE.txt": "jquery-2.2.1/LICENSE.txt",
-
-				"jquery-2.2.2/jquery.js": "jquery-2.2.2/dist/jquery.js",
-				"jquery-2.2.2/LICENSE.txt": "jquery-2.2.2/LICENSE.txt",
-
-				"jquery-2.2.3/jquery.js": "jquery-2.2.3/dist/jquery.js",
-				"jquery-2.2.3/LICENSE.txt": "jquery-2.2.3/LICENSE.txt",
 
 				"jquery-2.2.4/jquery.js": "jquery-2.2.4/dist/jquery.js",
 				"jquery-2.2.4/LICENSE.txt": "jquery-2.2.4/LICENSE.txt",
@@ -448,13 +356,7 @@ grunt.initConfig( {
 } );
 
 // grunt plugins
-require( "load-grunt-tasks" )( grunt, {
-	pattern: nodeV16OrNewer ? [ "grunt-*" ] : [
-		"grunt-*",
-		"!grunt-eslint",
-		"!grunt-html"
-	]
-} );
+require( "load-grunt-tasks" )( grunt );
 
 // local tasks
 grunt.loadTasks( "build/tasks" );
@@ -473,7 +375,7 @@ grunt.registerTask( "update-authors", function() {
 
 		authors = authors.map( function( author ) {
 			if ( author.match( /^Jacek Jędrzejewski </ ) ) {
-				return "Jacek Jędrzejewski (http://jacek.jedrzejewski.name)";
+				return "Jacek Jędrzejewski (https://jacek.jedrzejewski.name)";
 			} else if ( author.match( /^Pawel Maruszczyk </ ) ) {
 				return "Pawel Maruszczyk (http://hrabstwo.net)";
 			} else {
@@ -483,7 +385,7 @@ grunt.registerTask( "update-authors", function() {
 
 		grunt.file.write( "AUTHORS.txt",
 			"Authors ordered by first contribution\n" +
-			"A list of current team members is available at http://jqueryui.com/about\n\n" +
+			"A list of current team members is available at https://jqueryui.com/about\n\n" +
 			authors.join( "\n" ) + "\n" );
 		done();
 	} );
@@ -497,13 +399,12 @@ grunt.registerTask( "print_old_node_message", ( ...args ) => {
 // Keep this task list in sync with the testing steps in our GitHub action test workflow file!
 grunt.registerTask( "lint", [
 	"asciilint",
-	runIfNewNode( "eslint" ),
+	"eslint",
 	"csslint",
-	runIfNewNode( "htmllint" )
+	"htmllint"
 ] );
 grunt.registerTask( "build", [ "requirejs", "concat" ] );
 grunt.registerTask( "default", [ "lint", "build" ] );
-grunt.registerTask( "jenkins", [ "build" ] );
 grunt.registerTask( "sizer", [ "requirejs:js", "uglify:main", "compare_size:all" ] );
 grunt.registerTask( "sizer_all", [ "requirejs:js", "uglify", "compare_size" ] );
 
