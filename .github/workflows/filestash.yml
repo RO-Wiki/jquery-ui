@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+  # Or manually
+  workflow_dispatch:
 
 permissions:
   contents: read # to fetch code (actions/checkout)
